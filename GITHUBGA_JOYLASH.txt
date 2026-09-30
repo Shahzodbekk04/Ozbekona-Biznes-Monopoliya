@@ -1,0 +1,30 @@
+O'ZBEKONA BIZNES - GITHUB'GA JOYLASH (WINDOWS 10)
+
+Bu papkada o'yinning to'liq kodi, rasmlari, musiqasi, onlayn xona va ovozli
+suhbat uchun server kodi bor. Fayllarni o'zgartirmasdan GitHub'ga qo'yish mumkin.
+
+1. ZIP fayl ustida sichqonchaning o'ng tugmasini bosing -> Extract All
+   (yoki "Извлечь все") -> Extract. ZIP ichidan o'ynashga urinmang.
+2. https://desktop.github.com saytidan GitHub Desktop'ni o'rnating va
+   GitHub akkauntingiz bilan Sign in qiling.
+3. GitHub Desktop'da File -> Add local repository -> Choose... ni bosing.
+   ZIPdan chiqarilgan Ozbekona-Biznes-GitHub papkasini tanlang.
+4. Tepada Publish repository tugmasini bosing. Repository nomi uchun
+   Ozbekona-Biznes-Monopoliya deb yozing.
+5. "Keep this code private" belgilangan bo'lsa, kodni faqat siz ko'rasiz.
+   Boshqalar kodni ko'rishini istasangiz, belgisini olib tashlang.
+   So'ng Publish Repository tugmasini bosing.
+6. Repository -> View on GitHub ni bosing. Saytda README.md, app, game,
+   components, public va db papkalari ko'rinsa, kod joylangan.
+
+MUHIM: GitHub kodni saqlaydi. Bu papkani GitHub'ga joylashning o'zi onlayn
+o'yinni avtomatik ishga tushirmaydi. GitHub Pages statik sayt uchun;
+do'stlar xonasi va ovozli suhbatga server hamda ma'lumotlar bazasi kerak.
+Hozirgi ishlayotgan o'yin: https://ozbekona-biznes-shahzod.uzamotors.chatgpt.site
+
+node_modules, dist kabi katta vaqtinchalik papkalar va haqiqiy .env sirli
+fayllari ZIPga qo'shilmagan. Kerakli kutubxonalar pnpm install orqali qayta
+o'rnatiladi. .env.example ichida faqat namunaviy sozlama bor.
+
+Keyin yangilash: kompyuterdagi shu papka fayllarini o'zgartiring, GitHub
+Desktop'da pastdagi Summaryga qisqa izoh yozing -> Commit to main -> Push origin.
