@@ -1,0 +1,6 @@
+Signalsmith Stretch 1.3.2 by Geraint Luff / Signalsmith Audio (MIT).
+https://signalsmith-audio.co.uk/code/stretch/
+https://registry.npmjs.org/signalsmith-stretch/-/signalsmith-stretch-1.3.2.tgz
+Local adaptation: retained the unmodified embedded WASM factory from SignalsmithStretch.mjs and exported it directly. The upstream streaming/file-player wrapper is replaced by ../voice-pitch-worklet.js for live mono speech, deterministic mute/reset, and lifecycle errors. No remote inference or voice upload.
+
+The embedded WASM factory is also included in ../voice-pitch-worklet.js to avoid a nested module import. Keep the license with both copies.
