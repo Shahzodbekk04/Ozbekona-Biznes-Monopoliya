@@ -1,0 +1,51 @@
+'use client';
+import { useState } from 'react';
+import { ArrowLeft, ArrowRight, Bot, Check, Dice5, Globe2, Play, Plus, Settings, Users } from 'lucide-react';
+import { usePresentation } from '@/game/preferences';
+import { tokenName } from '@/game/localization';
+import { TokenArt } from './game-art';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+
+export type LocalInput={name:string;bot:boolean;token:number}[];
+export function FigurePicker({value,onChange,disabled=false}:{value:number;onChange:(i:number)=>void;disabled?:boolean}){
+ const {t,language}=usePresentation();
+ return <div className="token-catalog"><p>{t('Figurangizni tanlang','Выберите фигурку','Choose your piece')}<strong>20</strong></p><div className="token-picker" aria-label={t('Figurani tanlash','Выбор фигурки','Piece selection')}>{Array.from({length:20},(_,i)=><button type="button" key={i} disabled={disabled} aria-label={tokenName(i,language)} aria-pressed={value===i} className={value===i?'chosen':''} onClick={()=>onChange(i)}><TokenArt index={i}/><span className="token-caption">{tokenName(i,language)}</span>{value===i&&<Check size={14}/>}</button>)}</div><span className="chosen-name">{tokenName(value,language)}</span></div>
+}
+export function GameMenu({ready,busy,error,hasSaved,invite,initialFigure,onFigure,onResume,onSettings,onLocal,onOnline}:{ready:boolean;busy:boolean;error:string;hasSaved:boolean;invite:string;initialFigure:number;onFigure:(n:number)=>void;onResume:()=>void;onSettings:()=>void;onLocal:(players:LocalInput,mode:string)=>void;onOnline:(op:'create'|'join',name:string,figure:number,code?:string)=>void}){
+ const {t,scene,zone,money,language}=usePresentation();
+ const [page,setPage]=useState<'home'|'bots'|'friends'|'create'|'join'|'hotseat'>('home');
+ const [name,setName]=useState(''),[count,setCount]=useState(3),[code,setCode]=useState(invite),[customCode,setCustomCode]=useState(''),[names,setNames]=useState(['','Aziz','Madina','Sardor']),[figures,setFigures]=useState([0,1,2,3]),[formError,setFormError]=useState('');
+ const back=()=>{setFormError('');setPage(page==='create'||page==='join'||page==='hotseat'?'friends':'home')};
+ const start=()=>{if(!name.trim()){setFormError(t('Ismingizni yozing.','Введите имя.','Enter your name.'));return}setFormError('');if(page==='create'||page==='join'){if(page==='create'&&!/^[A-Z0-9]{6}$/.test(customCode)){setFormError(t('6 ta harf yoki raqamdan iborat kod kiriting.','Введите код из 6 букв или цифр.','Enter a 6-character letter/number code.'));return}onOnline(page,name.trim(),initialFigure,page==='create'?customCode:code);return}onLocal(Array.from({length:count},(_,i)=>({name:i===0?name.trim():names[i]||t(`O‘yinchi ${i+1}`,`Игрок ${i+1}`,`Player ${i+1}`),bot:page==='bots'&&i>0,token:i===0?initialFigure:figures[i]})),page==='bots'?'bots':'hotseat')};
+ const heading=page==='home'?t('Bosh menyu','Главное меню','Main menu'):page==='bots'?t('Botlar bilan o‘ynash','Игра с ботами','Play with bots'):page==='friends'?t('Do‘stlar bilan o‘ynash','Игра с друзьями','Play with friends'):page==='create'?t('Xona yaratish','Создать комнату','Create a room'):page==='join'?t('Xonaga kirish','Войти в комнату','Join a room'):t('Bitta qurilmada','На одном устройстве','One device');
+ return <main className={`launch-screen zone-${zone}`}>
+  <img className="launch-background" src={scene} alt="" fetchPriority="high"/><div className="launch-shade"/>
+  <header className="launch-brand"><Dice5 size={30}/><span>{t('O‘zbekona Biznes','Узбекский бизнес','Uzbek Business')}<small>{t('MONOPOLIYA','МОНОПОЛИЯ','MONOPOLY')}</small></span></header>
+  <section className={'launch-panel '+(page==='home'?'launch-home':'')}>
+   {page!=='home'&&<button className="menu-back" onClick={back}><ArrowLeft size={18}/>{t('Orqaga','Назад','Back')}</button>}
+   <h1>{heading}</h1>
+   {page==='home'?<>
+    <p className="launch-subtitle">{t('O‘z davrangiz. O‘z strategiyangiz.','Ваша компания. Ваша стратегия.','Your table. Your strategy.')}</p>
+    {hasSaved&&<button className="resume-game" disabled={!ready||busy} onClick={onResume}><Play size={19}/>{t('O‘yinni davom ettirish','Продолжить игру','Resume game')}<ArrowRight size={17}/></button>}
+    <nav className="menu-choices" aria-label={heading}>
+     <button onClick={()=>{setPage('bots');setFormError('')}}><span className="choice-icon"><Bot size={27}/></span><span><strong>{t('Botlar bilan o‘ynash','Играть с ботами','Play with bots')}</strong><small>{t('1 o‘yinchi va 1–3 bot','Вы и 1–3 бота','You and 1–3 bots')}</small></span><ArrowRight size={20}/></button>
+     <button onClick={()=>{setPage('friends');setFormError('')}}><span className="choice-icon"><Users size={27}/></span><span><strong>{t('Do‘stlar bilan o‘ynash','Играть с друзьями','Play with friends')}</strong><small>{t('Xona orqali yoki bitta qurilmada','В комнате или на одном устройстве','In a room or on one device')}</small></span><ArrowRight size={20}/></button>
+     <button onClick={onSettings}><span className="choice-icon"><Settings size={26}/></span><span><strong>{t('Sozlamalar','Настройки','Settings')}</strong><small>{t('Til, valyuta, zona va ovoz','Язык, валюта, зона и звук','Language, currency, zone and sound')}</small></span><ArrowRight size={20}/></button>
+    </nav><div className="launch-foot"><span>2–4 {t('o‘yinchi','игрока','players')}</span><span>{money(15000000)}</span></div>
+   </>:page==='friends'?<>
+    <p className="launch-subtitle">{t('Do‘stlaringiz bilan bir davrada.','Соберитесь за одним столом.','Gather your friends around the table.')}</p>
+    <div className="menu-choices"><button onClick={()=>setPage('create')}><span className="choice-icon"><Plus size={27}/></span><span><strong>{t('Xona yaratish','Создать комнату','Create a room')}</strong><small>{t('6 ta harf yoki raqamdan kod tanlang','Выберите код из 6 букв или цифр','Choose a 6-character room code')}</small></span><ArrowRight size={20}/></button><button onClick={()=>{setCode(invite||code);setPage('join')}}><span className="choice-icon"><Globe2 size={26}/></span><span><strong>{t('Xonaga kirish','Войти в комнату','Join a room')}</strong><small>{t('Do‘stingiz yuborgan kod bilan','По коду от друга','Use your friend’s room code')}</small></span><ArrowRight size={20}/></button><button onClick={()=>setPage('hotseat')}><span className="choice-icon"><Users size={26}/></span><span><strong>{t('Bitta qurilmada','На одном устройстве','On one device')}</strong><small>{t('Navbat bilan o‘ynash','Играйте по очереди','Take turns together')}</small></span><ArrowRight size={20}/></button></div>
+   </>:<form onSubmit={e=>{e.preventDefault();start()}}>
+    <label className="field-label">{t('Ismingiz','Ваше имя','Your name')}<input value={name} maxLength={24} autoComplete="nickname" onChange={e=>setName(e.target.value)} placeholder={t('Ismingizni yozing','Введите имя','Enter your name')}/></label>
+    {page==='create'&&<label className="field-label">{t('O‘zingiz tanlagan xona kodi','Ваш код комнаты','Your chosen room code')}<input value={customCode} maxLength={6} minLength={6} required inputMode="text" autoCapitalize="characters" spellCheck={false} pattern="[A-Za-z0-9]{6}" className="code-input" autoComplete="off" onChange={e=>{setCustomCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''));setFormError('')}} placeholder="UZ2026"/><span className="small-note">{t('6 ta lotin harfi (A–Z) yoki raqam (0–9). Masalan: UZ2026. Kod oxirgi foydalanishdan keyin 24 soat band bo‘ladi.','6 латинских букв (A–Z) или цифр (0–9). Например: UZ2026. Код занят 24 часа после последнего использования.','6 letters (A–Z) or digits (0–9), e.g. UZ2026. Reserved for 24 hours after last use.')}</span></label>}
+    {page==='join'&&<label className="field-label">{t('Xona kodi','Код комнаты','Room code')}<input value={code} maxLength={7} className="code-input" inputMode="text" spellCheck={false} autoCapitalize="characters" autoComplete="off" onChange={e=>setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''))} placeholder="UZ2026"/></label>}
+    {(page==='bots'||page==='hotseat')&&<><label className="field-label">{t('O‘yinchilar soni','Количество игроков','Number of players')}</label><div className="count-selector">{[2,3,4].map(n=><button type="button" key={n} className={count===n?'selected':''} onClick={()=>setCount(n)}>{n}<small>{page==='bots'?`${n-1} ${t('bot','бот(а)','bots')}`:t('o‘yinchi','игрока','players')}</small></button>)}</div></>}
+    <details className="menu-figures"><summary><TokenArt index={initialFigure}/><span>{t('Figurangiz','Ваша фигурка','Your piece')}<strong>{t('20 xildan tanlang','Выберите из 20','Choose from 20')}</strong></span></summary><FigurePicker value={initialFigure} onChange={onFigure}/></details>
+    {page==='hotseat'&&Array.from({length:count-1},(_,i)=><div className="friend-fields" key={i}><label className="field-label">{t(`${i+2}-o‘yinchi`,`Игрок ${i+2}`,`Player ${i+2}`)}<input value={names[i+1]} maxLength={24} onChange={e=>setNames(old=>old.map((v,k)=>k===i+1?e.target.value:v))}/></label><Select value={String(figures[i+1])} onValueChange={v=>setFigures(old=>old.map((x,k)=>k===i+1?Number(v):x))}><SelectTrigger className="game-select" aria-label={t('Figura','Фигурка','Piece')}><SelectValue/></SelectTrigger><SelectContent className="game-select-options">{Array.from({length:20},(_,k)=><SelectItem key={k} value={String(k)}>{tokenName(k,language)}</SelectItem>)}</SelectContent></Select></div>)}
+    {(formError||error)&&<p role="alert" className="negative">{formError||error}</p>}
+    <button type="submit" className="gold-btn full launch-start" disabled={!ready||busy||(page==='join'&&!/^(?:[A-Z0-9]{6}|[A-Z2-9]{7})$/.test(code))||(page==='create'&&!/^[A-Z0-9]{6}$/.test(customCode))}>{busy?t('Ulanmoqda…','Подключение…','Connecting…'):page==='create'?t('Xona yaratish','Создать комнату','Create room'):page==='join'?t('Xonaga kirish','Войти','Join room'):t('O‘yinni boshlash','Начать игру','Start game')}<ArrowRight size={19}/></button>
+   </form>}
+  </section><footer className="launch-bottom">{t('Do‘stlar bilan onlayn o‘yin uchun internet kerak.','Для онлайн-игры с друзьями нужен интернет.','An internet connection is required for online play.')}</footer>
+ </main>
+}
+// Language is passed from the top-level hook; no hooks are called in loops.
